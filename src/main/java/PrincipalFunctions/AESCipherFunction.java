@@ -1,4 +1,8 @@
 package PrincipalFunctions;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -13,20 +17,20 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
 public class AESCipherFunction {
-    public static SecretKey generateKey(int n) throws NoSuchAlgorithmException {
+    public SecretKey generateKey() throws NoSuchAlgorithmException {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-        keyGenerator.init(n);   //128(16 bytes), 
+        keyGenerator.init(128);   //128(16 bytes), 
         SecretKey key = keyGenerator.generateKey();
         return key;
-    }
+    }    
     
-    public static IvParameterSpec generateIv() {
+    public IvParameterSpec generateIv() {
         byte[] iv = new byte[16];
         new SecureRandom().nextBytes(iv);
         return new IvParameterSpec(iv);
     }
     
-    public static String encrypt(String input, SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException,
+    public String encrypt(String input, SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException,
         InvalidAlgorithmParameterException, InvalidKeyException,
         BadPaddingException, IllegalBlockSizeException {
 
@@ -36,8 +40,7 @@ public class AESCipherFunction {
         return Base64.getEncoder().encodeToString(cipherText);
     }
     
-    public static String decrypt(String cipherText, SecretKey key,
-        IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException,
+    public String decrypt(String cipherText, SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException,
         InvalidAlgorithmParameterException, InvalidKeyException,
         BadPaddingException, IllegalBlockSizeException {
 
@@ -52,7 +55,7 @@ public class AESCipherFunction {
         BadPaddingException, InvalidAlgorithmParameterException, NoSuchPaddingException { 
 
         String input = "baeldung";
-        SecretKey key = generateKey(128);
+        SecretKey key = generateKey();
         IvParameterSpec ivParameterSpec = generateIv();
         String algorithm = "AES/CBC/PKCS5Padding";
         String cipherText = encrypt(input, key, ivParameterSpec);
@@ -60,7 +63,32 @@ public class AESCipherFunction {
         //Assertions.assertEquals(input, plainText);
     }
     
-    public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    public void encryptFile(SecretKey key, IvParameterSpec iv,
+        File inputFile, File outputFile) throws IOException, NoSuchPaddingException,
+        NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException,
+        BadPaddingException, IllegalBlockSizeException {
+
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+        FileInputStream inputStream = new FileInputStream(inputFile);
+        FileOutputStream outputStream = new FileOutputStream(outputFile);
+        byte[] buffer = new byte[64];
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            byte[] output = cipher.update(buffer, 0, bytesRead);
+            if (output != null) {
+                outputStream.write(output);
+            }
+        }
+        byte[] outputBytes = cipher.doFinal();
+        if (outputBytes != null) {
+            outputStream.write(outputBytes);
+        }
+        inputStream.close();
+        outputStream.close();
+    }
+    
+    /*public static void main(String[] args) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         String input = "baeldung";
         SecretKey key = generateKey(128);
         IvParameterSpec ivParameterSpec = generateIv();
@@ -72,5 +100,5 @@ public class AESCipherFunction {
         System.out.println("Cipher text: " + cipherText);
         System.out.println("Decrypt text: " + plainText);
         
-    }
+    }*/
 }

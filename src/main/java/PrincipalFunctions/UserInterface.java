@@ -11,17 +11,25 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Base64;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
@@ -37,13 +45,12 @@ public class UserInterface extends javax.swing.JFrame {
     String publicKey = "";
     String mensaje = "";
     String IV = "";
-    String claveAES = "";
-    
-    String digestoCifrado, digesto;
-    
+    String claveAES = "";    
+    String digestoCifrado="", digesto="";   
     String fileName;
     
     RSACipherFunction cipherRSA = new RSACipherFunction();
+    AESCipherFunction cipherAES = new AESCipherFunction();
     
     public UserInterface() {
         initComponents();
@@ -82,21 +89,18 @@ public class UserInterface extends javax.swing.JFrame {
         return textFromFile;
     }
     
-    public void createFileFirma(String name, String textFirma){
+    public void createFileCipher(String name, String textCipher){
         File archivoCifrado = new File(name + ".txt");            
-        try{
-            //Creamos el Archivo
-            archivoCifrado.createNewFile();
+        try{            
+            archivoCifrado.createNewFile(); //Creamos el Archivo
 
             FileWriter fw = new FileWriter(archivoCifrado);
             BufferedWriter bw = new BufferedWriter(fw);
             PrintWriter pw = new PrintWriter(bw);
-
-            //Escribimos el Mensaje Cifrado
-            pw.write(textFirma);
-
-            //Cerramos los objetos del Archivo.
-            pw.close();
+          
+            pw.write(textCipher);    //Escribimos el Mensaje Cifrado
+         
+            pw.close(); //Cerramos los objetos del Archivo.
             bw.close();
             
         }catch(IOException ex){
@@ -122,6 +126,48 @@ public class UserInterface extends javax.swing.JFrame {
         return sha1;
     }
     
+    public String givenUsingJava8_whenGeneratingRandomAlphanumericString_thenCorrect() {
+        int leftLimit = 48; // numeral '0'
+        int rightLimit = 122; // letter 'z'
+        int targetStringLength = 16;
+        Random random = new Random();
+
+        String generatedString = random.ints(leftLimit, rightLimit + 1)
+          .filter(i -> (i <= 57 || i >= 65) && (i <= 90 || i >= 97))
+          .limit(targetStringLength)
+          .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+          .toString();
+        
+        return generatedString;
+    }
+    
+    public String cifrarAESwithRSA(String claveAES, String IV) throws UnsupportedEncodingException, NoSuchPaddingException,
+            NoSuchAlgorithmException, InvalidAlgorithmParameterException, BadPaddingException, 
+            IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException{
+        
+        SecretKeySpec keySecretAES = new SecretKeySpec(claveAES.getBytes("UTF-8"), "AES");
+        IvParameterSpec IVparams = new IvParameterSpec(IV.getBytes("UTF-8"));
+
+        String msgCifrado = cipherAES.encrypt(mensaje, keySecretAES, IVparams);
+        System.out.println("Cipher message: " + msgCifrado);
+
+        cipherRSA.setPublicKey(publicKey);
+        
+        String AESkeyCipherByRSA = Base64.getEncoder().encodeToString(cipherRSA.encryptWithPublicKey(claveAES, publicKey));
+        byte[] AESkeyChipherByRSA = cipherRSA.encryptWithPublicKey(claveAES, publicKey);
+        System.out.println("Key AES cipher: " + AESkeyChipherByRSA.toString() + " sze:" + AESkeyChipherByRSA.toString().length());
+        System.out.println("Key AES cipher: " + AESkeyCipherByRSA + " sze:" + AESkeyCipherByRSA.length());
+
+        String AESIVCipherwithRSA = Base64.getEncoder().encodeToString(cipherRSA.encryptWithPublicKey(IV, publicKey));
+        byte[] AESIVcipherByRSA = cipherRSA.encryptWithPublicKey(IV, publicKey);
+        System.out.println(" IV AES cipher: " + AESIVcipherByRSA.toString() + " sze:" + AESkeyChipherByRSA.toString().length());
+        System.out.println(" IV AES cipher: " + AESIVCipherwithRSA + " sze:" + AESIVCipherwithRSA.length());
+        
+        String msgWithKeysCipher = AESIVCipherwithRSA + AESkeyCipherByRSA + msgCifrado;
+        System.out.println("Msg final AESwithRSA cifrado: ");
+        System.out.println(msgWithKeysCipher);
+        return msgWithKeysCipher;
+    }
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -399,17 +445,87 @@ public class UserInterface extends javax.swing.JFrame {
 
     private void CDkeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CDkeyActionPerformed
         if(CDoption == 1){      //opcion: Cifrado
-            //vamos a recuperar IV y la llave de 16 bytes
-            claveAES = OpenFile();
-            
-            
-        }else if(CDoption == 2){        //opcion: Descifrado
-            
+            publicKey = OpenFile();            
+        }else if(CDoption == 2){        //opcion: Descifrado            
+            privateKey = OpenFile();                      
         }
     }//GEN-LAST:event_CDkeyActionPerformed
 
     private void CDfinalizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_CDfinalizarActionPerformed
-        // TODO add your handling code here:
+        if(CDoption == 1){  //pa cifrar             
+            //generamos una key aleaoria entre 0 y Z
+            claveAES = givenUsingJava8_whenGeneratingRandomAlphanumericString_thenCorrect();
+            System.out.println("Generating random key string: " + claveAES + " sz: " + claveAES.length());             
+             
+            IV = "1234567891123456";
+            System.out.println("IV: " + IV + " size: " + IV.length());
+             
+            try {                
+                String msgAEScipher = cifrarAESwithRSA(claveAES, IV);
+                createFileCipher("CifradoAES_" + fileName, msgAEScipher);
+                
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchPaddingException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidAlgorithmParameterException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (BadPaddingException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalBlockSizeException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidKeyException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidKeySpecException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            }
+             
+        }else if(CDoption == 2){ //pa descifrar
+            
+            //Entramos los primeros 11 digitos que se cifraron con RSA del IV y luego los 11 de la key de AES
+            IV = mensaje.substring(0, 171);
+            System.out.println("IV cifrado con RSA : " + IV);
+            claveAES = mensaje.substring(172, 343);
+            System.out.println(" Clave AES con RSA : " + claveAES);              
+            mensaje = mensaje.substring(344, mensaje.length());
+            System.out.println("Mensaje cifrado con AES: " + mensaje);
+            
+            try {                                
+                cipherRSA.setPrivateKey(privateKey);
+                
+                IV = cipherRSA.decryptWithPrivateKey(IV, privateKey);
+                System.out.println("IV original: " + IV);
+                
+                claveAES = cipherRSA.decryptWithPrivateKey(claveAES, privateKey);
+                System.out.println("AES originl: " + claveAES);
+                
+                SecretKeySpec keySecretAES = new SecretKeySpec(claveAES.getBytes("UTF-8"), "AES");
+                IvParameterSpec IVparams = new IvParameterSpec(IV.getBytes("UTF-8"));
+                mensaje = cipherAES.decrypt(mensaje, keySecretAES, IVparams);
+                System.out.println("mensaje original: " + mensaje);
+                
+                createFileCipher("DescifradoAES_" + fileName, mensaje);
+                
+            } catch (NoSuchPaddingException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidKeyException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (BadPaddingException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalBlockSizeException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidKeySpecException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidAlgorithmParameterException ex) {
+                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }//GEN-LAST:event_CDfinalizarActionPerformed
 
     private void FVoptionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FVoptionsActionPerformed
@@ -454,7 +570,7 @@ public class UserInterface extends javax.swing.JFrame {
             String firma = digestoCifrado + digesto;
             System.out.println("msng Firma: " + firma);
             
-            createFileFirma("Firma_" + fileName, firma);            
+            createFileCipher("Firma_" + fileName, firma);            
             
         }else if(FVoption == 2){  //--------------------Seleccion: Verificación ---------------------    
             digestoCifrado = mensaje.substring(0,(mensaje.length()-40));
