@@ -23,17 +23,14 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
-                      <EmptySpace min="-2" pref="146" max="-2" attributes="0"/>
-                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="37" max="-2" attributes="0"/>
-                      <Component id="jTabbedPane1" min="-2" pref="627" max="-2" attributes="0"/>
-                  </Group>
-              </Group>
+          <Group type="102" alignment="1" attributes="0">
+              <EmptySpace max="32767" attributes="0"/>
+              <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="209" max="-2" attributes="0"/>
+          </Group>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+              <Component id="jTabbedPane1" min="-2" pref="646" max="-2" attributes="0"/>
               <EmptySpace pref="21" max="32767" attributes="0"/>
           </Group>
       </Group>
@@ -88,18 +85,22 @@
                                   <Component id="TStypeOfKey" max="32767" attributes="0"/>
                                   <Component id="TSllaveEmisor" alignment="0" max="32767" attributes="0"/>
                               </Group>
-                              <EmptySpace min="-2" pref="82" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="TSfile" max="32767" attributes="0"/>
-                                  <Component id="TSkey" max="32767" attributes="0"/>
-                                  <Component id="TSoptions" alignment="0" pref="160" max="32767" attributes="0"/>
-                                  <Component id="TSkeyEmisor" max="32767" attributes="0"/>
-                              </Group>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="TSfileName" max="32767" attributes="0"/>
-                                  <Component id="TSkeyName" max="32767" attributes="0"/>
-                                  <Component id="TSkeyEmisorName" alignment="0" pref="110" max="32767" attributes="0"/>
+                              <EmptySpace min="-2" pref="59" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="0" attributes="0">
+                                  <Group type="102" attributes="0">
+                                      <Group type="103" groupAlignment="1" attributes="0">
+                                          <Component id="TSfile" min="-2" pref="160" max="-2" attributes="0"/>
+                                          <Component id="TSkeyEmisor" min="-2" pref="160" max="-2" attributes="0"/>
+                                          <Component id="TSkey" min="-2" pref="160" max="-2" attributes="0"/>
+                                      </Group>
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                          <Component id="TSkeyEmisorName" pref="153" max="32767" attributes="0"/>
+                                          <Component id="TSfileName" alignment="1" max="32767" attributes="0"/>
+                                          <Component id="TSkeyName" alignment="1" max="32767" attributes="0"/>
+                                      </Group>
+                                  </Group>
+                                  <Component id="TSoptions" min="-2" pref="160" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
@@ -111,7 +112,7 @@
                               <Component id="TSfinalizar" min="-2" pref="170" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="19" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -309,7 +310,7 @@
                           <Group type="102" attributes="0">
                               <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                  <Component id="jLabel5" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="CDmensaje" alignment="0" max="32767" attributes="0"/>
                                   <Group type="102" alignment="1" attributes="0">
                                       <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace min="-2" pref="40" max="-2" attributes="0"/>
@@ -319,46 +320,49 @@
                               </Group>
                               <EmptySpace min="-2" pref="64" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="102" attributes="0">
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Component id="CDoptions" min="-2" pref="165" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="19" max="-2" attributes="0"/>
+                                  </Group>
+                                  <Group type="102" alignment="0" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Component id="CDfile" min="-2" pref="165" max="-2" attributes="0"/>
                                           <Component id="CDkey" min="-2" pref="165" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
                                           <Component id="CDfileName" max="32767" attributes="0"/>
-                                          <Component id="CDkeyName" pref="110" max="32767" attributes="0"/>
+                                          <Component id="CDkeyName" pref="148" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
-                                  <Component id="CDoptions" min="-2" pref="165" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="206" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="232" max="-2" attributes="0"/>
                               <Component id="jLabel4" min="-2" pref="140" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="192" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="200" max="-2" attributes="0"/>
                               <Component id="CDfinalizar" min="-2" pref="170" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="18" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
                       <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="39" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="37" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jLabel7" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
                           <Component id="CDoptions" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" pref="46" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jLabel5" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
+                          <Component id="CDmensaje" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
                           <Component id="CDfile" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="CDfileName" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -370,9 +374,9 @@
                           <Component id="CDkey" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="CDkeyName" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" pref="43" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="42" max="-2" attributes="0"/>
                       <Component id="CDfinalizar" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="74" max="32767" attributes="0"/>
+                      <EmptySpace pref="75" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -389,7 +393,7 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="CDfileActionPerformed"/>
               </Events>
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel5">
+            <Component class="javax.swing.JLabel" name="CDmensaje">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Tahoma" size="12" style="0"/>
@@ -497,7 +501,7 @@
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="FVlabelKey" min="-2" pref="190" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="jLabel9" max="32767" attributes="0"/>
+                                      <Component id="FVmensaje" max="32767" attributes="0"/>
                                       <Component id="jLabel3" pref="190" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
@@ -510,35 +514,35 @@
                               <EmptySpace min="-2" pref="30" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                   <Component id="FVfileName" max="32767" attributes="0"/>
-                                  <Component id="FVkeyName" pref="110" max="32767" attributes="0"/>
+                                  <Component id="FVkeyName" pref="130" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="212" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="239" max="-2" attributes="0"/>
                               <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="191" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="207" max="-2" attributes="0"/>
                               <Component id="FVfinalizar" min="-2" pref="170" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace pref="22" max="32767" attributes="0"/>
+                      <EmptySpace pref="21" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
                       <Component id="jLabel8" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="jLabel3" alignment="3" min="-2" pref="20" max="-2" attributes="0"/>
                           <Component id="FVoptions" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace pref="55" max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="jLabel9" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
+                          <Component id="FVmensaje" alignment="3" min="-2" pref="23" max="-2" attributes="0"/>
                           <Component id="FVfile" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="FVfileName" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
@@ -606,7 +610,7 @@
                 <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
               </AuxValues>
             </Component>
-            <Component class="javax.swing.JLabel" name="jLabel9">
+            <Component class="javax.swing.JLabel" name="FVmensaje">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Tahoma" size="12" style="0"/>

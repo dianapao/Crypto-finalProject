@@ -62,7 +62,9 @@ public class UserInterface extends javax.swing.JFrame {
         File f;        
         String textFromFile = "";
         openFile = new JFileChooser();        
-        openFile.setCurrentDirectory(new File("C:\\Users\\Diana Paola\\Documents\\NetBeansProjects\\FirmaVerificYCifradoDescifrado"));
+        
+        openFile.setCurrentDirectory(new File(System.getProperty("user.dir"))); //dir proyecto
+        System.out.println("Working Directory = " + System.getProperty("user.dir"));
         
         int r = openFile.showOpenDialog(null);       
         if(r==JFileChooser.APPROVE_OPTION){
@@ -79,9 +81,9 @@ public class UserInterface extends javax.swing.JFrame {
                     textFromFile += scanner.nextLine();
                     textFromFile += "\n";               
                 }
-                textFromFile=textFromFile.substring(0, (textFromFile.length()-1) );
+                textFromFile=textFromFile.substring(0, (textFromFile.length()-1) ); //eliminamos el ultimo salto de linea
                 System.out.println(textFromFile);
-                System.out.println("FIN.");
+                System.out.println("FIN Lectura archivo.");
             } catch (FileNotFoundException ex) {
                 Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -89,7 +91,7 @@ public class UserInterface extends javax.swing.JFrame {
         return textFromFile;
     }
     
-    public void createFileCipher(String name, String textCipher){
+    public void createFileCipher(String name, String textCipher){   //generamos un nuevo archivo
         File archivoCifrado = new File(name + ".txt");            
         try{            
             archivoCifrado.createNewFile(); //Creamos el Archivo
@@ -108,7 +110,7 @@ public class UserInterface extends javax.swing.JFrame {
         }
     }
     
-    public String getDigesto(String mnsg){
+    public String getDigesto(String mnsg){  //Sacamos el digesto del mensaje
         String sha1 = "";		
         // With the java libraries
         try {
@@ -123,20 +125,20 @@ public class UserInterface extends javax.swing.JFrame {
         System.out.println( " Digesto sha1 of \""+ mnsg + "\" is:");
         System.out.println( sha1 + " sz: " + sha1.length() );
         
-        return sha1;
+        return sha1;    //regresa el digesto de un mensaje (longitud: 40 caracteres)
     }
     
     public String getTextfirma(String mensaje) throws BadPaddingException, IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException{
-        String digesto = getDigesto(mensaje);
-        byte[] bytesDigesto = digesto.getBytes();
+        String digesto = getDigesto(mensaje);   //le sacamos el digesto al mensaje en texto plano
+        byte[] bytesDigesto = digesto.getBytes();   //convertimos el digesto de string a un byte[]
 
-        String digestoCifrado = "";     
-        digestoCifrado = java.util.Base64.getEncoder().encodeToString(cipherRSA.encrypt(digesto, privateKey));
-        //mensaje_cifrado = java.util.Base64.getEncoder().encodeToString(chipherRSA.encrypt(sha1, llavePrivada02));
+        String digestoCifrado = "";  
+        //ciframos el digesto utilizando RSA y la llave privada del emisor
+        digestoCifrado = java.util.Base64.getEncoder().encodeToString(cipherRSA.encrypt(digesto, privateKey));        
         System.out.println("Digesto CIFRADO: \n" + digestoCifrado + " sz: " + digestoCifrado.length());
-        String firma = digestoCifrado + digesto;
+        String firma = digestoCifrado + digesto;    //unimos el digesto cifrado + digesto
         
-        return firma;
+        return firma;   // firma = DigestoCifrado + DigestoOriginal
     }
     
     public String givenUsingJava8_whenGeneratingRandomAlphanumericString_thenCorrect() {
@@ -158,14 +160,16 @@ public class UserInterface extends javax.swing.JFrame {
             NoSuchAlgorithmException, InvalidAlgorithmParameterException, BadPaddingException, 
             IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException{
         
+        //Creamos la SecretKey de acuerdo al texto que nos dieron "claveAES" y lo mismo con IV
         SecretKeySpec keySecretAES = new SecretKeySpec(claveAES.getBytes("UTF-8"), "AES");
         IvParameterSpec IVparams = new IvParameterSpec(IV.getBytes("UTF-8"));
 
-        String msgCifrado = cipherAES.encrypt(mensaje, keySecretAES, IVparams);
+        String msgCifrado = cipherAES.encrypt(mensaje, keySecretAES, IVparams); //ciframos el mensaje en plano
         System.out.println("Cipher message: " + msgCifrado + " sz: " + msgCifrado.length());
 
-        cipherRSA.setPublicKey(publicKey);
+        cipherRSA.setPublicKey(publicKey);  //solamente a nuestra clase RSACipherFunction le decimos cual es la publicKey
         
+        //Cifradmos nuestra llave del AES utilizando la llave pública del receptor con AES y lo mismo para IV
         String AESkeyCipherByRSA = Base64.getEncoder().encodeToString(cipherRSA.encryptWithPublicKey(claveAES, publicKey));        
         System.out.println("Key AES cipher: " + AESkeyCipherByRSA + " sze:" + AESkeyCipherByRSA.length());
 
@@ -175,16 +179,19 @@ public class UserInterface extends javax.swing.JFrame {
         String msgWithKeysCipher = AESIVCipherwithRSA + AESkeyCipherByRSA + msgCifrado;
         System.out.println("Msg final AESwithRSA cifrado: " );
         System.out.println(msgWithKeysCipher);
+        
         return msgWithKeysCipher;   //return cifrado: IV(cifrado con rsa) + key (cif con RSA) + mensaje (cifrado con AES)
     }
     
     public String encryptWithAES(String mensaje) throws UnsupportedEncodingException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, BadPaddingException, IllegalBlockSizeException, InvalidKeyException, InvalidKeySpecException{
-        claveAES = givenUsingJava8_whenGeneratingRandomAlphanumericString_thenCorrect();
+            
+        //Generamos una llave aletoria de String entre 0 a Z            
+        claveAES = givenUsingJava8_whenGeneratingRandomAlphanumericString_thenCorrect();        
         System.out.println("Generating random key string: " + claveAES + " sz: " + claveAES.length());             
 
         IV = "1234567891123456";
         System.out.println("IV: " + IV + " size: " + IV.length());
-        String msgAEScipher = cifrarAESwithRSA(mensaje, claveAES, IV);
+        String msgAEScipher = cifrarAESwithRSA(mensaje, claveAES, IV); //mandamos a cifrar el texto plano
         
         return msgAEScipher;
     }
@@ -192,18 +199,18 @@ public class UserInterface extends javax.swing.JFrame {
     public String decryptWithAES(String mensaje) throws IllegalBlockSizeException, InvalidKeyException, BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeySpecException, UnsupportedEncodingException, InvalidAlgorithmParameterException{
         cipherRSA.setPrivateKey(privateKey);
                 
-        IV = cipherRSA.decryptWithPrivateKey(IV, privateKey);
+        IV = cipherRSA.decryptWithPrivateKey(IV, privateKey);   //desciframos IV con la llave privada del receptor y RSA
         System.out.println("IV original: " + IV);
 
-        claveAES = cipherRSA.decryptWithPrivateKey(claveAES, privateKey);
+        claveAES = cipherRSA.decryptWithPrivateKey(claveAES, privateKey);   //igual desciframos la clave original de AES
         System.out.println("AES originl: " + claveAES);
 
-        SecretKeySpec keySecretAES = new SecretKeySpec(claveAES.getBytes("UTF-8"), "AES");
-        IvParameterSpec IVparams = new IvParameterSpec(IV.getBytes("UTF-8"));
-        mensaje = cipherAES.decrypt(mensaje, keySecretAES, IVparams);
+        SecretKeySpec keySecretAES = new SecretKeySpec(claveAES.getBytes("UTF-8"), "AES"); //Obtenemos la llave original
+        IvParameterSpec IVparams = new IvParameterSpec(IV.getBytes("UTF-8"));   //obtenemos el IV original
+        mensaje = cipherAES.decrypt(mensaje, keySecretAES, IVparams);   //Desciframos el mensaje cifrado con AES
         System.out.println("mensaje original: " + mensaje);
         
-        return mensaje;
+        return mensaje; //Regresamos el mensaje descifrado con AES
     } 
     
     /**
@@ -234,7 +241,7 @@ public class UserInterface extends javax.swing.JFrame {
         TSkeyEmisorName = new javax.swing.JLabel();
         jPanel3 = new javax.swing.JPanel();
         CDfile = new javax.swing.JButton();
-        jLabel5 = new javax.swing.JLabel();
+        CDmensaje = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
         CDoptions = new javax.swing.JComboBox<>();
         jLabel7 = new javax.swing.JLabel();
@@ -249,7 +256,7 @@ public class UserInterface extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         FVkey = new javax.swing.JButton();
         FVoptions = new javax.swing.JComboBox<>();
-        jLabel9 = new javax.swing.JLabel();
+        FVmensaje = new javax.swing.JLabel();
         FVlabelKey = new javax.swing.JLabel();
         FVfinalizar = new javax.swing.JButton();
         FVfileName = new javax.swing.JLabel();
@@ -340,24 +347,26 @@ public class UserInterface extends javax.swing.JFrame {
                             .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                             .addComponent(TStypeOfKey, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(TSllaveEmisor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGap(82, 82, 82)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(TSfile, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(TSkey, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(TSoptions, 0, 160, Short.MAX_VALUE)
-                            .addComponent(TSkeyEmisor, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(TSfileName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(TSkeyName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(TSkeyEmisorName, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)))
+                        .addGap(59, 59, 59)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(TSfile, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(TSkeyEmisor, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(TSkey, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addComponent(TSkeyEmisorName, javax.swing.GroupLayout.DEFAULT_SIZE, 153, Short.MAX_VALUE)
+                                    .addComponent(TSfileName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(TSkeyName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(TSoptions, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(251, 251, 251)
                         .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 97, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(204, 204, 204)
                         .addComponent(TSfinalizar, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(19, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
                 .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(TStypeOfService, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -408,8 +417,8 @@ public class UserInterface extends javax.swing.JFrame {
             }
         });
 
-        jLabel5.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel5.setText("Mensaje");
+        CDmensaje.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        CDmensaje.setText("Mensaje");
 
         CDoptions.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         CDoptions.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Selecciona una opción", "Cifrar", "Descifrar" }));
@@ -458,7 +467,7 @@ public class UserInterface extends javax.swing.JFrame {
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(26, 26, 26)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(CDmensaje, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
                                 .addComponent(jLabel6)
                                 .addGap(40, 40, 40))
@@ -467,34 +476,36 @@ public class UserInterface extends javax.swing.JFrame {
                         .addGap(64, 64, 64)
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(CDoptions, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(19, 19, 19))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(CDfile, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(CDkey, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addGap(29, 29, 29)
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addGap(18, 18, 18)
+                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(CDfileName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(CDkeyName, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)))
-                            .addComponent(CDoptions, javax.swing.GroupLayout.PREFERRED_SIZE, 165, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(CDkeyName, javax.swing.GroupLayout.DEFAULT_SIZE, 148, Short.MAX_VALUE)))))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(206, 206, 206)
+                        .addGap(232, 232, 232)
                         .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(192, 192, 192)
+                        .addGap(200, 200, 200)
                         .addComponent(CDfinalizar, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(24, 24, 24)
+                .addGap(26, 26, 26)
                 .addComponent(jLabel4)
-                .addGap(39, 39, 39)
+                .addGap(37, 37, 37)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(CDoptions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(46, 46, 46)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(CDmensaje, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(CDfile)
                     .addComponent(CDfileName))
                 .addGap(27, 27, 27)
@@ -504,9 +515,9 @@ public class UserInterface extends javax.swing.JFrame {
                     .addComponent(CDlabelKey, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(CDkey)
                     .addComponent(CDkeyName))
-                .addGap(43, 43, 43)
+                .addGap(42, 42, 42)
                 .addComponent(CDfinalizar)
-                .addContainerGap(74, Short.MAX_VALUE))
+                .addContainerGap(75, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Cifrado/Descifrado", jPanel3);
@@ -538,8 +549,8 @@ public class UserInterface extends javax.swing.JFrame {
             }
         });
 
-        jLabel9.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
-        jLabel9.setText("Mensaje");
+        FVmensaje.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
+        FVmensaje.setText("Mensaje");
 
         FVlabelKey.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         FVlabelKey.setText("Llave");
@@ -573,7 +584,7 @@ public class UserInterface extends javax.swing.JFrame {
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(FVlabelKey, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(FVmensaje, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, 190, Short.MAX_VALUE)))
                         .addGap(83, 83, 83)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
@@ -583,27 +594,27 @@ public class UserInterface extends javax.swing.JFrame {
                         .addGap(30, 30, 30)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(FVfileName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(FVkeyName, javax.swing.GroupLayout.DEFAULT_SIZE, 110, Short.MAX_VALUE)))
+                            .addComponent(FVkeyName, javax.swing.GroupLayout.DEFAULT_SIZE, 130, Short.MAX_VALUE)))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(212, 212, 212)
+                        .addGap(239, 239, 239)
                         .addComponent(jLabel8))
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(191, 191, 191)
+                        .addGap(207, 207, 207)
                         .addComponent(FVfinalizar, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(22, Short.MAX_VALUE))
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
+                .addGap(27, 27, 27)
                 .addComponent(jLabel8)
-                .addGap(35, 35, 35)
+                .addGap(34, 34, 34)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 20, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(FVoptions, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(FVmensaje, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(FVfile)
                     .addComponent(FVfileName))
                 .addGap(52, 52, 52)
@@ -622,14 +633,13 @@ public class UserInterface extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addGap(209, 209, 209))
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(146, 146, 146)
-                        .addComponent(jLabel1))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(37, 37, 37)
-                        .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 627, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(18, 18, 18)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 646, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(21, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -651,9 +661,11 @@ public class UserInterface extends javax.swing.JFrame {
         CDoption = CDoptions.getSelectedIndex();
         if(CDoption == 1){    //selección: Cifrado
             CDlabelKey.setText("Llave pública receptor");
+            CDmensaje.setText("Mensaje plano");
             
         }else if(CDoption == 2){  //selección: descifrado
-            CDlabelKey.setText("Llave privada");
+            CDlabelKey.setText("Llave privada receptor");
+            CDmensaje.setText("Mensaje cifrado");
         }
     }//GEN-LAST:event_CDoptionsActionPerformed
 
@@ -715,21 +727,29 @@ public class UserInterface extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(null, "Mensaje descifrado en el archivo creado");
                 
             } catch (NoSuchPaddingException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo descifrar");
             } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo descifrar");
             } catch (InvalidKeyException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo descifrar");
             } catch (BadPaddingException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo descifrar");
             } catch (IllegalBlockSizeException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo descifrar");
             } catch (InvalidKeySpecException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo descifrar");
             } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo descifrar");
             } catch (InvalidAlgorithmParameterException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo descifrar");
             }
         }
     }//GEN-LAST:event_CDfinalizarActionPerformed
@@ -737,49 +757,60 @@ public class UserInterface extends javax.swing.JFrame {
     private void FVoptionsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FVoptionsActionPerformed
         FVoption = FVoptions.getSelectedIndex();
         
-        if(FVoption == 1)   //Selección: firma
-            FVlabelKey.setText("Llave privada");
-        else if(FVoption == 2)  //Seleccion: Verificación
+        if(FVoption == 1){   //Selección: firma
+            FVlabelKey.setText("Llave privada emisor");
+            FVmensaje.setText("Mensaje en plano");
+            
+        }else if(FVoption == 2){  //Seleccion: Verificación
             FVlabelKey.setText("Llave pública emisor");
-        
+            FVmensaje.setText("Mensaje firmado");
+        }
     }//GEN-LAST:event_FVoptionsActionPerformed
 
     private void FVfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FVfileActionPerformed
-        mensaje = OpenFile();
+        mensaje = OpenFile();   //en la var mensaje guarda el contenido del archivo seleccionado
         FVfileName.setText(fileName);
     }//GEN-LAST:event_FVfileActionPerformed
 
     private void FVfinalizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FVfinalizarActionPerformed
-        if(FVoption == 1){    //Selección: firma
+        if(FVoption == 1){    //Selección: FIRMA
             
             String firma = "";
             try {
-                firma = getTextfirma(mensaje);  //digestoCifrado + digesto
+                firma = getTextfirma(mensaje);  // firma = digestoCifrado + digesto
                 System.out.println("msng Firma: " + firma);
-                createFileCipher("Firma_" + fileName, firma);
-                JOptionPane.showMessageDialog(null, "Archivo creado");
+                createFileCipher("Firma_" + fileName, firma); //creamos un archivo con el contenido de firma
+                JOptionPane.showMessageDialog(null, "Archivo de firma creado");
                 
             } catch (BadPaddingException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo crear la firma");
             } catch (IllegalBlockSizeException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo crear la firma");
             } catch (InvalidKeyException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo crear la firma");
             } catch (NoSuchPaddingException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo crear la firma");
             } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo crear la firma");
             } catch (InvalidKeySpecException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(null, "No se pudo crear la firma");
             }         
             
         }else if(FVoption == 2){  //--------------------Seleccion: Verificación ---------------------    
-            digestoCifrado = mensaje.substring(0,(mensaje.length()-40));
+            //del archivo recibido extraemos el digesto cifrado y los ultimos 40 digitos del digesto normal
+            digestoCifrado = mensaje.substring(0,(mensaje.length()-40));   
             digesto = mensaje.substring((mensaje.length()-40),mensaje.length());
             
             System.out.println("Dig Cif: " + digestoCifrado);                    
             String decryptedString = "";
             try {
+                //Desciframos el digesto con la llave pública del emisor utilizando RSA
                 decryptedString = cipherRSA.decrypt(digestoCifrado, publicKey); 
                 
                 System.out.println("MENSAJE DESCIFRADO: " + decryptedString);
@@ -815,10 +846,11 @@ public class UserInterface extends javax.swing.JFrame {
 
     private void FVkeyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_FVkeyActionPerformed
         if(FVoption == 1)
-            privateKey = OpenFile();
+            privateKey = OpenFile();    //guardamos la llave privada
         else if(FVoption == 2)        
-            publicKey = OpenFile();
-        FVkeyName.setText(fileName);
+            publicKey = OpenFile();     //guardamos la llave pública
+        
+        FVkeyName.setText(fileName);    
     }//GEN-LAST:event_FVkeyActionPerformed
 
     private void TSfileActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TSfileActionPerformed
@@ -926,28 +958,28 @@ public class UserInterface extends javax.swing.JFrame {
                 }
                 
             } catch (IllegalBlockSizeException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
             } catch (InvalidKeyException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
             } catch (BadPaddingException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
             } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
             } catch (NoSuchPaddingException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
             } catch (InvalidKeySpecException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
             } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
             } catch (InvalidAlgorithmParameterException ex) {
-                Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
+                //Logger.getLogger(UserInterface.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showInputDialog (null, "CUIDADO. FIRMA INVALIDA!!!");
             }
                 
@@ -997,6 +1029,7 @@ public class UserInterface extends javax.swing.JFrame {
     private javax.swing.JButton CDkey;
     private javax.swing.JLabel CDkeyName;
     private javax.swing.JLabel CDlabelKey;
+    private javax.swing.JLabel CDmensaje;
     private javax.swing.JComboBox<String> CDoptions;
     private javax.swing.JButton FVfile;
     private javax.swing.JLabel FVfileName;
@@ -1004,6 +1037,7 @@ public class UserInterface extends javax.swing.JFrame {
     private javax.swing.JButton FVkey;
     private javax.swing.JLabel FVkeyName;
     private javax.swing.JLabel FVlabelKey;
+    private javax.swing.JLabel FVmensaje;
     private javax.swing.JComboBox<String> FVoptions;
     private javax.swing.JButton TSfile;
     private javax.swing.JLabel TSfileName;
@@ -1022,11 +1056,9 @@ public class UserInterface extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
